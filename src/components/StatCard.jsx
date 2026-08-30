@@ -4,27 +4,49 @@ export default function StatCard({
   description,
   accent = "default",
 }) {
-  const accentClass =
+  const styles =
     accent === "positive"
-      ? "text-emerald-700"
+      ? {
+          wrap: "border-emerald-200 bg-emerald-50/70",
+          value: "text-emerald-700",
+          badge: "bg-emerald-100 text-emerald-700",
+        }
       : accent === "negative"
-        ? "text-red-600"
-        : "text-slate-900";
+        ? {
+            wrap: "border-red-200 bg-red-50/70",
+            value: "text-red-600",
+            badge: "bg-red-100 text-red-700",
+          }
+        : {
+            wrap: "border-slate-200 bg-white",
+            value: "text-slate-900",
+            badge: "bg-slate-100 text-slate-600",
+          };
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
-      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
-        {label}
-      </p>
+    <div className={`rounded-3xl border p-4 shadow-sm sm:p-5 ${styles.wrap}`}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-xs font-semibold tracking-wide text-slate-500">
+            {label}
+          </p>
 
-      <p className={`mt-2 text-2xl font-bold sm:text-3xl ${accentClass}`}>
-        {value}
-      </p>
+          <p
+            className={`mt-2 text-3xl font-black leading-none ${styles.value}`}
+          >
+            {value}
+          </p>
+        </div>
+
+        <span
+          className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${styles.badge}`}
+        >
+          হিসাব
+        </span>
+      </div>
 
       {description && (
-        <p className="mt-2 text-xs leading-5 text-slate-500 sm:text-sm">
-          {description}
-        </p>
+        <p className="mt-3 text-xs leading-5 text-slate-500">{description}</p>
       )}
     </div>
   );
