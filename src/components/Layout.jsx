@@ -1,5 +1,4 @@
 import { NavLink, Outlet } from "react-router-dom";
-
 import { Home, Receipt, RefreshCw, Shield, Users, Wallet } from "lucide-react";
 
 import { useTripData } from "../context/TripDataContext";
@@ -8,28 +7,28 @@ import { formatDate } from "../lib/format";
 const navigation = [
   {
     to: "/",
-    label: "Overview",
+    label: "সারাংশ",
     icon: Home,
     end: true,
   },
   {
     to: "/expenses",
-    label: "Expenses",
+    label: "খরচ",
     icon: Receipt,
   },
   {
     to: "/deposits",
-    label: "Deposits",
+    label: "জমা",
     icon: Wallet,
   },
   {
     to: "/travellers",
-    label: "Travellers",
+    label: "যাত্রী",
     icon: Users,
   },
   {
     to: "/admin",
-    label: "Admin",
+    label: "অ্যাডমিন",
     icon: Shield,
   },
 ];
@@ -52,7 +51,6 @@ function DesktopNavigation() {
           }
         >
           <Icon size={16} />
-
           {label}
         </NavLink>
       ))}
@@ -77,7 +75,6 @@ function MobileNavigation() {
             }
           >
             <Icon size={19} />
-
             <span className="mt-1 truncate">{label}</span>
           </NavLink>
         ))}
@@ -93,23 +90,21 @@ export default function Layout() {
     <div className="min-h-screen bg-[#f5f7f5]">
       <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-700 text-sm font-bold text-white">
-                ॐ
-              </div>
+          <div className="flex min-w-0 items-center gap-2">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-700 text-sm font-bold text-white">
+              ॐ
+            </div>
 
-              <div className="min-w-0">
-                <h1 className="truncate text-sm font-bold text-slate-900 sm:text-base">
-                  {trip?.trip_name || "Char Dham Yatra"}
-                </h1>
+            <div className="min-w-0">
+              <h1 className="truncate text-sm font-bold text-slate-900 sm:text-base">
+                {trip?.trip_name || "চারধাম যাত্রা ২০২৬"}
+              </h1>
 
+              {trip?.start_date && (
                 <p className="truncate text-[11px] text-slate-500 sm:text-xs">
-                  {trip?.start_date
-                    ? `Journey starts ${formatDate(trip.start_date)}`
-                    : "Trip Expense Tracker"}
+                  যাত্রা শুরু: {formatDate(trip.start_date)}
                 </p>
-              </div>
+              )}
             </div>
           </div>
 
@@ -120,8 +115,7 @@ export default function Layout() {
               type="button"
               onClick={refresh}
               disabled={loading}
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-slate-200 text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
-              aria-label="Refresh data"
+              className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-600"
             >
               <RefreshCw size={17} className={loading ? "animate-spin" : ""} />
             </button>
@@ -130,8 +124,8 @@ export default function Layout() {
       </header>
 
       {error && (
-        <div className="border-b border-red-200 bg-red-50 px-4 py-2 text-center text-sm text-red-700">
-          {error}
+        <div className="bg-red-50 px-4 py-2 text-center text-sm text-red-700">
+          তথ্য লোড করা যায়নি।
         </div>
       )}
 

@@ -1,9 +1,7 @@
 import { useState } from "react";
-
 import { Pencil, Trash2 } from "lucide-react";
 
 import { useTripData } from "../../context/TripDataContext";
-
 import { supabase } from "../../lib/supabase";
 
 import { formatDate, formatMoney, todayISO } from "../../lib/format";
@@ -21,11 +19,8 @@ export default function DepositManager() {
   const { travellers, deposits, refresh } = useTripData();
 
   const [form, setForm] = useState(createInitialForm());
-
   const [editingId, setEditingId] = useState(null);
-
   const [saving, setSaving] = useState(false);
-
   const [message, setMessage] = useState("");
 
   const travellerNames = new Map(
@@ -55,8 +50,7 @@ export default function DepositManager() {
       Number(form.amount) <= 0 ||
       !form.deposit_date
     ) {
-      setMessage("Traveller, date and valid amount are required.");
-
+      setMessage("যাত্রী, তারিখ এবং জমার পরিমাণ দিন।");
       return;
     }
 
@@ -82,16 +76,18 @@ export default function DepositManager() {
     }
 
     if (response.error) {
-      setMessage(response.error.message);
+      setMessage("জমার তথ্য সংরক্ষণ করা যায়নি।");
       setSaving(false);
       return;
     }
 
     await refresh();
 
+    const wasEditing = Boolean(editingId);
+
     resetForm();
 
-    setMessage(editingId ? "Deposit updated." : "Deposit added.");
+    setMessage(wasEditing ? "জমার তথ্য আপডেট হয়েছে।" : "জমা যোগ হয়েছে।");
 
     setSaving(false);
   }
@@ -113,7 +109,7 @@ export default function DepositManager() {
   }
 
   async function deleteDeposit(deposit) {
-    const confirmed = window.confirm("Delete this deposit?");
+    const confirmed = window.confirm("এই জমার রেকর্ডটি মুছে ফেলবেন?");
 
     if (!confirmed) return;
 
@@ -123,7 +119,7 @@ export default function DepositManager() {
       .eq("id", deposit.id);
 
     if (error) {
-      setMessage(error.message);
+      setMessage("জমার রেকর্ড মুছে ফেলা যায়নি।");
       return;
     }
 
@@ -133,25 +129,25 @@ export default function DepositManager() {
 
     await refresh();
 
-    setMessage("Deposit deleted.");
+    setMessage("জমার রেকর্ড মুছে ফেলা হয়েছে।");
   }
 
   return (
     <div className="space-y-5">
       <form onSubmit={handleSubmit} className="panel">
         <h3 className="text-lg font-bold text-slate-900">
-          {editingId ? "Edit Deposit" : "Add Deposit"}
+          {editingId ? "জমা সম্পাদনা" : "নতুন জমা"}
         </h3>
 
         {travellers.length === 0 && (
           <div className="mt-4 rounded-xl bg-amber-50 p-3 text-sm text-amber-800">
-            Add at least one traveller before recording deposits.
+            জমা যোগ করার আগে একজন যাত্রী যোগ করুন।
           </div>
         )}
 
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           <div>
-            <label className="form-label">Traveller *</label>
+            <label className="form-label">যাত্রী *</label>
 
             <select
               className="form-control"
@@ -159,7 +155,7 @@ export default function DepositManager() {
               value={form.traveller_id}
               onChange={updateField}
             >
-              <option value="">Select traveller</option>
+              <option value="">যাত্রী নির্বাচন করুন</option>
 
               {travellers.map((traveller) => (
                 <option key={traveller.id} value={traveller.id}>
@@ -170,7 +166,7 @@ export default function DepositManager() {
           </div>
 
           <div>
-            <label className="form-label">Amount *</label>
+            <label className="form-label">জমার পরিমাণ *</label>
 
             <input
               type="number"
@@ -180,12 +176,12 @@ export default function DepositManager() {
               name="amount"
               value={form.amount}
               onChange={updateField}
-              placeholder="5000"
+              placeholder="যেমন: ৫০০০"
             />
           </div>
 
           <div>
-            <label className="form-label">Deposit Date *</label>
+            <label className="form-label">জমার তারিখ *</label>
 
             <input
               type="date"
@@ -197,14 +193,14 @@ export default function DepositManager() {
           </div>
 
           <div>
-            <label className="form-label">Note</label>
+            <label className="form-label">মন্তব্য</label>
 
             <input
               className="form-control"
               name="note"
               value={form.note}
               onChange={updateField}
-              placeholder="Cash / bank / etc."
+              placeholder="প্রয়োজন হলে লিখুন"
             />
           </div>
         </div>
@@ -216,15 +212,15 @@ export default function DepositManager() {
             className="btn-primary"
           >
             {saving
-              ? "Saving..."
+              ? "সংরক্ষণ হচ্ছে..."
               : editingId
-                ? "Update Deposit"
-                : "Add Deposit"}
+                ? "আপডেট করুন"
+                : "জমা যোগ করুন"}
           </button>
 
           {editingId && (
             <button type="button" onClick={resetForm} className="btn-secondary">
-              Cancel
+              বাতিল
             </button>
           )}
         </div>
@@ -233,12 +229,12 @@ export default function DepositManager() {
       </form>
 
       <div className="panel">
-        <h3 className="font-bold text-slate-900">Deposit Records</h3>
+        <h3 className="font-bold text-slate-900">জমার রেকর্ড</h3>
 
         <div className="mt-4 divide-y divide-slate-100">
           {deposits.length === 0 ? (
             <p className="py-6 text-center text-sm text-slate-500">
-              No deposits yet.
+              কোনো জমার রেকর্ড নেই।
             </p>
           ) : (
             deposits.map((deposit) => (
@@ -248,7 +244,7 @@ export default function DepositManager() {
               >
                 <div>
                   <p className="font-medium text-slate-900">
-                    {travellerNames.get(deposit.traveller_id) || "Traveller"}
+                    {travellerNames.get(deposit.traveller_id) || "যাত্রী"}
                   </p>
 
                   <p className="mt-1 text-xs text-slate-500">
@@ -266,6 +262,7 @@ export default function DepositManager() {
                     type="button"
                     onClick={() => startEdit(deposit)}
                     className="icon-btn"
+                    title="সম্পাদনা"
                   >
                     <Pencil size={16} />
                   </button>
@@ -274,6 +271,7 @@ export default function DepositManager() {
                     type="button"
                     onClick={() => deleteDeposit(deposit)}
                     className="icon-btn-danger"
+                    title="মুছুন"
                   >
                     <Trash2 size={16} />
                   </button>

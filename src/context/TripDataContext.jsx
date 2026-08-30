@@ -79,7 +79,7 @@ export function TripDataProvider({ children }) {
     } catch (err) {
       console.error(err);
 
-      setError(err?.message || "Unable to load trip information.");
+      setError("যাত্রার হিসাব লোড করা যায়নি।");
 
       return false;
     } finally {
@@ -172,7 +172,7 @@ export function useTripData() {
   const context = useContext(TripDataContext);
 
   if (!context) {
-    throw new Error("useTripData must be used inside TripDataProvider");
+    throw new Error("TripDataProvider-এর ভিতরে useTripData ব্যবহার করতে হবে।");
   }
 
   return context;

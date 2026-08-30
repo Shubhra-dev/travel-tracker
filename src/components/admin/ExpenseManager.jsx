@@ -1,30 +1,29 @@
 import { useState } from "react";
-
 import { Pencil, Trash2 } from "lucide-react";
 
 import { useTripData } from "../../context/TripDataContext";
-
 import { supabase } from "../../lib/supabase";
 
 import { formatDate, formatMoney, todayISO } from "../../lib/format";
 
 const categories = [
-  "Transport",
-  "Hotel",
-  "Food",
-  "Tickets",
-  "Temple / Puja",
-  "Medicine",
-  "Shopping",
-  "Emergency",
-  "Miscellaneous",
+  "যাতায়াত",
+  "হোটেল",
+  "খাবার",
+  "টিকিট",
+  "পূজা / মন্দির",
+  "ওষুধ",
+  "কেনাকাটা",
+  "জরুরি",
+  "অন্যান্য",
 ];
 
 function createInitialForm() {
   return {
     expense_date: todayISO(),
-    category: "Transport",
+    category: "যাতায়াত",
     description: "",
+    place: "",
     amount: "",
   };
 }
@@ -33,11 +32,8 @@ export default function ExpenseManager() {
   const { expenses, refresh } = useTripData();
 
   const [form, setForm] = useState(createInitialForm());
-
   const [editingId, setEditingId] = useState(null);
-
   const [saving, setSaving] = useState(false);
-
   const [message, setMessage] = useState("");
 
   function updateField(event) {
@@ -64,8 +60,7 @@ export default function ExpenseManager() {
       !form.amount ||
       Number(form.amount) <= 0
     ) {
-      setMessage("Date, category, description and valid amount are required.");
-
+      setMessage("সব প্রয়োজনীয় তথ্য দিন।");
       return;
     }
 
@@ -76,6 +71,7 @@ export default function ExpenseManager() {
       expense_date: form.expense_date,
       category: form.category,
       description: form.description.trim(),
+      place: form.place.trim() || null,
       amount: Number(form.amount),
     };
 
@@ -97,11 +93,9 @@ export default function ExpenseManager() {
     }
 
     await refresh();
-
     resetForm();
 
-    setMessage(editingId ? "Expense updated." : "Expense added.");
-
+    setMessage(editingId ? "খরচ আপডেট হয়েছে।" : "খরচ যোগ হয়েছে।");
     setSaving(false);
   }
 
@@ -112,6 +106,7 @@ export default function ExpenseManager() {
       expense_date: expense.expense_date,
       category: expense.category,
       description: expense.description,
+      place: expense.place || "",
       amount: String(expense.amount),
     });
 
@@ -122,9 +117,7 @@ export default function ExpenseManager() {
   }
 
   async function deleteExpense(expense) {
-    const confirmed = window.confirm(`Delete "${expense.description}"?`);
-
-    if (!confirmed) return;
+    if (!window.confirm("এই খরচটি মুছবেন?")) return;
 
     const { error } = await supabase
       .from("expenses")
@@ -141,20 +134,19 @@ export default function ExpenseManager() {
     }
 
     await refresh();
-
-    setMessage("Expense deleted.");
+    setMessage("খরচ মুছে ফেলা হয়েছে।");
   }
 
   return (
     <div className="space-y-5">
       <form onSubmit={handleSubmit} className="panel">
         <h3 className="text-lg font-bold text-slate-900">
-          {editingId ? "Edit Expense" : "Add Expense"}
+          {editingId ? "খরচ সম্পাদনা" : "নতুন খরচ"}
         </h3>
 
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           <div>
-            <label className="form-label">Date *</label>
+            <label className="form-label">তারিখ *</label>
 
             <input
               type="date"
@@ -166,7 +158,7 @@ export default function ExpenseManager() {
           </div>
 
           <div>
-            <label className="form-label">Category *</label>
+            <label className="form-label">ক্যাটাগরি *</label>
 
             <select
               className="form-control"
@@ -183,19 +175,31 @@ export default function ExpenseManager() {
           </div>
 
           <div>
-            <label className="form-label">Expense Details *</label>
+            <label className="form-label">খরচের বিবরণ *</label>
 
             <input
               className="form-control"
               name="description"
               value={form.description}
               onChange={updateField}
-              placeholder="e.g. Delhi to Haridwar car"
+              placeholder="যেমন: দিল্লি থেকে হরিদ্বার গাড়ি"
             />
           </div>
 
           <div>
-            <label className="form-label">Amount *</label>
+            <label className="form-label">স্থান</label>
+
+            <input
+              className="form-control"
+              name="place"
+              value={form.place}
+              onChange={updateField}
+              placeholder="যেমন: হরিদ্বার"
+            />
+          </div>
+
+          <div>
+            <label className="form-label">পরিমাণ *</label>
 
             <input
               type="number"
@@ -213,15 +217,15 @@ export default function ExpenseManager() {
         <div className="mt-4 flex gap-2">
           <button type="submit" disabled={saving} className="btn-primary">
             {saving
-              ? "Saving..."
+              ? "সেভ হচ্ছে..."
               : editingId
-                ? "Update Expense"
-                : "Add Expense"}
+                ? "আপডেট করুন"
+                : "খরচ যোগ করুন"}
           </button>
 
           {editingId && (
             <button type="button" onClick={resetForm} className="btn-secondary">
-              Cancel
+              বাতিল
             </button>
           )}
         </div>
@@ -230,53 +234,50 @@ export default function ExpenseManager() {
       </form>
 
       <div className="panel">
-        <h3 className="font-bold text-slate-900">Expense Records</h3>
+        <h3 className="font-bold text-slate-900">খরচের রেকর্ড</h3>
 
         <div className="mt-4 divide-y divide-slate-100">
-          {expenses.length === 0 ? (
-            <p className="py-6 text-center text-sm text-slate-500">
-              No expenses yet.
-            </p>
-          ) : (
-            expenses.map((expense) => (
-              <div
-                key={expense.id}
-                className="flex items-start justify-between gap-4 py-3"
-              >
-                <div>
-                  <p className="font-medium text-slate-900">
-                    {expense.description}
-                  </p>
+          {expenses.map((expense) => (
+            <div
+              key={expense.id}
+              className="flex items-start justify-between gap-4 py-3"
+            >
+              <div>
+                <p className="font-medium text-slate-900">
+                  {expense.description}
+                </p>
 
-                  <p className="mt-1 text-xs text-slate-500">
-                    {formatDate(expense.expense_date)} · {expense.category}
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <p className="mr-1 text-sm font-bold text-slate-900">
-                    {formatMoney(expense.amount)}
-                  </p>
-
-                  <button
-                    type="button"
-                    onClick={() => startEdit(expense)}
-                    className="icon-btn"
-                  >
-                    <Pencil size={16} />
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => deleteExpense(expense)}
-                    className="icon-btn-danger"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
+                <p className="mt-1 text-xs text-slate-500">
+                  {formatDate(expense.expense_date)}
+                  {" · "}
+                  {expense.category}
+                  {expense.place && ` · ${expense.place}`}
+                </p>
               </div>
-            ))
-          )}
+
+              <div className="flex items-center gap-2">
+                <p className="mr-1 text-sm font-bold">
+                  {formatMoney(expense.amount)}
+                </p>
+
+                <button
+                  type="button"
+                  onClick={() => startEdit(expense)}
+                  className="icon-btn"
+                >
+                  <Pencil size={16} />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => deleteExpense(expense)}
+                  className="icon-btn-danger"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>

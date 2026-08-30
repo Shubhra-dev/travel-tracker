@@ -1,5 +1,4 @@
 import { useState } from "react";
-
 import { Pencil, Trash2 } from "lucide-react";
 
 import { useTripData } from "../../context/TripDataContext";
@@ -14,11 +13,8 @@ export default function TravelerManager() {
   const { travellers, refresh } = useTripData();
 
   const [form, setForm] = useState(initialForm);
-
   const [editingId, setEditingId] = useState(null);
-
   const [saving, setSaving] = useState(false);
-
   const [message, setMessage] = useState("");
 
   function updateField(event) {
@@ -39,7 +35,7 @@ export default function TravelerManager() {
     event.preventDefault();
 
     if (!form.name.trim()) {
-      setMessage("Traveller name is required.");
+      setMessage("যাত্রীর নাম দিন।");
       return;
     }
 
@@ -63,16 +59,20 @@ export default function TravelerManager() {
     }
 
     if (response.error) {
-      setMessage(response.error.message);
+      setMessage("তথ্য সংরক্ষণ করা যায়নি।");
       setSaving(false);
       return;
     }
 
     await refresh();
 
+    const wasEditing = Boolean(editingId);
+
     resetForm();
 
-    setMessage(editingId ? "Traveller updated." : "Traveller added.");
+    setMessage(
+      wasEditing ? "যাত্রীর তথ্য আপডেট হয়েছে।" : "নতুন যাত্রী যোগ হয়েছে।",
+    );
 
     setSaving(false);
   }
@@ -92,7 +92,7 @@ export default function TravelerManager() {
   }
 
   async function deleteTraveller(traveller) {
-    const confirmed = window.confirm(`Delete ${traveller.name}?`);
+    const confirmed = window.confirm(`${traveller.name}-কে মুছে ফেলবেন?`);
 
     if (!confirmed) return;
 
@@ -102,10 +102,7 @@ export default function TravelerManager() {
       .eq("id", traveller.id);
 
     if (error) {
-      setMessage(
-        "This traveller may already have deposits. Delete their deposit entries first, then remove the traveller.",
-      );
-
+      setMessage("এই যাত্রীর জমার রেকর্ড আছে। আগে তার জমার রেকর্ড মুছে ফেলুন।");
       return;
     }
 
@@ -115,38 +112,38 @@ export default function TravelerManager() {
 
     await refresh();
 
-    setMessage("Traveller deleted.");
+    setMessage("যাত্রী মুছে ফেলা হয়েছে।");
   }
 
   return (
     <div className="space-y-5">
       <form onSubmit={handleSubmit} className="panel">
         <h3 className="text-lg font-bold text-slate-900">
-          {editingId ? "Edit Traveller" : "Add Traveller"}
+          {editingId ? "যাত্রীর তথ্য সম্পাদনা" : "নতুন যাত্রী"}
         </h3>
 
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <div>
-            <label className="form-label">Traveller Name *</label>
+            <label className="form-label">যাত্রীর নাম *</label>
 
             <input
               className="form-control"
               name="name"
               value={form.name}
               onChange={updateField}
-              placeholder="e.g. Shubhradev"
+              placeholder="নাম লিখুন"
             />
           </div>
 
           <div>
-            <label className="form-label">Note</label>
+            <label className="form-label">অতিরিক্ত তথ্য</label>
 
             <input
               className="form-control"
               name="note"
               value={form.note}
               onChange={updateField}
-              placeholder="Optional"
+              placeholder="প্রয়োজন হলে লিখুন"
             />
           </div>
         </div>
@@ -154,15 +151,15 @@ export default function TravelerManager() {
         <div className="mt-4 flex flex-wrap gap-2">
           <button type="submit" disabled={saving} className="btn-primary">
             {saving
-              ? "Saving..."
+              ? "সংরক্ষণ হচ্ছে..."
               : editingId
-                ? "Update Traveller"
-                : "Add Traveller"}
+                ? "আপডেট করুন"
+                : "যাত্রী যোগ করুন"}
           </button>
 
           {editingId && (
             <button type="button" onClick={resetForm} className="btn-secondary">
-              Cancel
+              বাতিল
             </button>
           )}
         </div>
@@ -172,17 +169,17 @@ export default function TravelerManager() {
 
       <div className="panel">
         <div className="flex items-center justify-between">
-          <h3 className="font-bold text-slate-900">Traveller List</h3>
+          <h3 className="font-bold text-slate-900">যাত্রী তালিকা</h3>
 
           <span className="text-xs text-slate-500">
-            {travellers.length} total
+            মোট {travellers.length} জন
           </span>
         </div>
 
         <div className="mt-4 divide-y divide-slate-100">
           {travellers.length === 0 ? (
             <p className="py-6 text-center text-sm text-slate-500">
-              No travellers added.
+              কোনো যাত্রী যোগ করা হয়নি।
             </p>
           ) : (
             travellers.map((traveller) => (
@@ -205,6 +202,7 @@ export default function TravelerManager() {
                     type="button"
                     onClick={() => startEdit(traveller)}
                     className="icon-btn"
+                    title="সম্পাদনা"
                   >
                     <Pencil size={16} />
                   </button>
@@ -213,6 +211,7 @@ export default function TravelerManager() {
                     type="button"
                     onClick={() => deleteTraveller(traveller)}
                     className="icon-btn-danger"
+                    title="মুছুন"
                   >
                     <Trash2 size={16} />
                   </button>

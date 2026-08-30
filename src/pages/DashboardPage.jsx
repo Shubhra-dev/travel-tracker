@@ -1,7 +1,5 @@
 import StatCard from "../components/StatCard";
-
 import { useTripData } from "../context/TripDataContext";
-
 import { formatDate, formatMoney } from "../lib/format";
 
 export default function DashboardPage() {
@@ -9,8 +7,8 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-[50vh] items-center justify-center">
-        <p className="text-sm text-slate-500">Loading trip accounts...</p>
+      <div className="py-20 text-center text-sm text-slate-500">
+        হিসাব লোড হচ্ছে...
       </div>
     );
   }
@@ -20,66 +18,43 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       <section>
-        <p className="text-sm font-semibold text-emerald-700">Trip Accounts</p>
-
-        <h2 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
-          Common Fund Overview
-        </h2>
-
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-          All deposits go into one common fund. Total expenses are automatically
-          divided equally between all travellers.
-        </p>
+        <h2 className="text-2xl font-bold text-slate-900">যাত্রার হিসাব</h2>
       </section>
 
       <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatCard
-          label="Total Collected"
+          label="মোট জমা"
           value={formatMoney(summary.totalDeposits)}
-          description="Total money deposited"
           accent="positive"
         />
 
-        <StatCard
-          label="Total Spent"
-          value={formatMoney(summary.totalExpenses)}
-          description="All trip expenses"
-        />
+        <StatCard label="মোট খরচ" value={formatMoney(summary.totalExpenses)} />
 
         <StatCard
-          label="Cash in Hand"
+          label="বর্তমান তহবিল"
           value={formatMoney(summary.cashInHand)}
-          description="Collected minus expenses"
           accent={summary.cashInHand >= 0 ? "positive" : "negative"}
         />
 
         <StatCard
-          label="Expense / Person"
+          label="জনপ্রতি খরচ"
           value={formatMoney(summary.perPersonExpense)}
-          description={`${summary.travellerCount} traveller${
-            summary.travellerCount === 1 ? "" : "s"
-          }`}
         />
       </section>
 
       <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div className="border-b border-slate-100 px-4 py-4 sm:px-5">
-          <h3 className="font-bold text-slate-900">Traveller Settlement</h3>
-
-          <p className="mt-1 text-xs text-slate-500">
-            Positive means extra deposited. Negative means amount still due.
-          </p>
+          <h3 className="font-bold text-slate-900">যাত্রীদের হিসাব</h3>
         </div>
 
         {summary.settlements.length === 0 ? (
           <div className="p-8 text-center text-sm text-slate-500">
-            No travellers added yet.
+            কোনো যাত্রী যোগ করা হয়নি।
           </div>
         ) : (
           <div className="divide-y divide-slate-100">
             {summary.settlements.map((traveller) => {
               const isDue = traveller.balance < -0.01;
-
               const isExtra = traveller.balance > 0.01;
 
               return (
@@ -91,25 +66,23 @@ export default function DashboardPage() {
                     <p className="font-semibold text-slate-900">
                       {traveller.name}
                     </p>
-
                     <p className="mt-1 text-xs text-slate-500">
-                      Deposited {formatMoney(traveller.deposited)}
+                      জমা {formatMoney(traveller.deposited)}
                     </p>
                   </div>
 
                   <div className="flex justify-between sm:block">
                     <span className="text-xs text-slate-500 sm:block">
-                      Expense Share
+                      খরচের অংশ
                     </span>
-
-                    <span className="text-sm font-medium text-slate-800">
+                    <span className="text-sm font-medium">
                       {formatMoney(traveller.expenseShare)}
                     </span>
                   </div>
 
                   <div className="flex justify-between sm:block">
                     <span className="text-xs text-slate-500 sm:block">
-                      Balance
+                      ব্যালেন্স
                     </span>
 
                     <span
@@ -138,7 +111,7 @@ export default function DashboardPage() {
                             : "bg-slate-100 text-slate-600",
                       ].join(" ")}
                     >
-                      {isDue ? "Due" : isExtra ? "Extra Paid" : "Settled"}
+                      {isDue ? "বাকি" : isExtra ? "অতিরিক্ত জমা" : "সমান"}
                     </span>
                   </div>
                 </div>
@@ -150,37 +123,30 @@ export default function DashboardPage() {
 
       <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div className="border-b border-slate-100 px-4 py-4 sm:px-5">
-          <h3 className="font-bold text-slate-900">Recent Expenses</h3>
+          <h3 className="font-bold text-slate-900">সাম্প্রতিক খরচ</h3>
         </div>
 
-        {recentExpenses.length === 0 ? (
-          <div className="p-8 text-center text-sm text-slate-500">
-            No expense recorded yet.
-          </div>
-        ) : (
-          <div className="divide-y divide-slate-100">
-            {recentExpenses.map((expense) => (
-              <div
-                key={expense.id}
-                className="flex items-start justify-between gap-4 px-4 py-4 sm:px-5"
-              >
-                <div className="min-w-0">
-                  <p className="font-medium text-slate-900">
-                    {expense.description}
-                  </p>
+        <div className="divide-y divide-slate-100">
+          {recentExpenses.map((expense) => (
+            <div
+              key={expense.id}
+              className="flex justify-between gap-4 px-4 py-4 sm:px-5"
+            >
+              <div>
+                <p className="font-medium text-slate-900">
+                  {expense.description}
+                </p>
 
-                  <p className="mt-1 text-xs text-slate-500">
-                    {formatDate(expense.expense_date)} · {expense.category}
-                  </p>
-                </div>
-
-                <p className="shrink-0 font-bold text-slate-900">
-                  {formatMoney(expense.amount)}
+                <p className="mt-1 text-xs text-slate-500">
+                  {formatDate(expense.expense_date)}
+                  {expense.place && ` · ${expense.place}`}
                 </p>
               </div>
-            ))}
-          </div>
-        )}
+
+              <p className="font-bold">{formatMoney(expense.amount)}</p>
+            </div>
+          ))}
+        </div>
       </section>
     </div>
   );

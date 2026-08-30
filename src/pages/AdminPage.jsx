@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-
 import { LogOut } from "lucide-react";
 
 import { supabase } from "../lib/supabase";
@@ -11,33 +10,29 @@ import TravelerManager from "../components/admin/TravelerManager";
 const tabs = [
   {
     id: "expenses",
-    label: "Expenses",
+    label: "খরচ",
   },
   {
     id: "deposits",
-    label: "Deposits",
+    label: "জমা",
   },
   {
     id: "travellers",
-    label: "Travellers",
+    label: "যাত্রী",
   },
 ];
 
 export default function AdminPage() {
   const [session, setSession] = useState(null);
-
   const [checking, setChecking] = useState(true);
-
   const [isAdmin, setIsAdmin] = useState(false);
 
   const [activeTab, setActiveTab] = useState("expenses");
 
   const [email, setEmail] = useState("");
-
   const [password, setPassword] = useState("");
 
   const [loginError, setLoginError] = useState("");
-
   const [loggingIn, setLoggingIn] = useState(false);
 
   useEffect(() => {
@@ -109,8 +104,7 @@ export default function AdminPage() {
     event.preventDefault();
 
     if (!email || !password) {
-      setLoginError("Email and password are required.");
-
+      setLoginError("ইমেইল এবং পাসওয়ার্ড দিন।");
       return;
     }
 
@@ -123,7 +117,7 @@ export default function AdminPage() {
     });
 
     if (error) {
-      setLoginError(error.message);
+      setLoginError("ইমেইল অথবা পাসওয়ার্ড সঠিক নয়।");
     }
 
     setLoggingIn(false);
@@ -136,7 +130,7 @@ export default function AdminPage() {
   if (checking) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
-        <p className="text-sm text-slate-500">Checking admin access...</p>
+        <p className="text-sm text-slate-500">অ্যাডমিন তথ্য যাচাই হচ্ছে...</p>
       </div>
     );
   }
@@ -149,21 +143,11 @@ export default function AdminPage() {
           className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7"
         >
           <div className="mb-6">
-            <p className="text-sm font-semibold text-emerald-700">
-              Restricted Area
-            </p>
-
-            <h2 className="mt-1 text-2xl font-bold text-slate-900">
-              Admin Login
-            </h2>
-
-            <p className="mt-2 text-sm leading-6 text-slate-500">
-              Login to add or modify travellers, deposits and expenses.
-            </p>
+            <h2 className="text-2xl font-bold text-slate-900">অ্যাডমিন লগইন</h2>
           </div>
 
           <div>
-            <label className="form-label">Email</label>
+            <label className="form-label">ইমেইল</label>
 
             <input
               type="email"
@@ -171,11 +155,12 @@ export default function AdminPage() {
               value={email}
               onChange={(event) => setEmail(event.target.value)}
               autoComplete="email"
+              placeholder="ইমেইল লিখুন"
             />
           </div>
 
           <div className="mt-4">
-            <label className="form-label">Password</label>
+            <label className="form-label">পাসওয়ার্ড</label>
 
             <input
               type="password"
@@ -183,6 +168,7 @@ export default function AdminPage() {
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               autoComplete="current-password"
+              placeholder="পাসওয়ার্ড লিখুন"
             />
           </div>
 
@@ -197,7 +183,7 @@ export default function AdminPage() {
             disabled={loggingIn}
             className="btn-primary mt-5 w-full"
           >
-            {loggingIn ? "Signing in..." : "Login"}
+            {loggingIn ? "লগইন হচ্ছে..." : "লগইন করুন"}
           </button>
         </form>
       </div>
@@ -207,11 +193,10 @@ export default function AdminPage() {
   if (!isAdmin) {
     return (
       <div className="mx-auto max-w-lg rounded-2xl border border-red-200 bg-red-50 p-5">
-        <h2 className="font-bold text-red-800">Admin access not available</h2>
+        <h2 className="font-bold text-red-800">অ্যাডমিন অনুমতি নেই</h2>
 
-        <p className="mt-2 text-sm leading-6 text-red-700">
-          This account is authenticated but is not registered in the app_admins
-          table.
+        <p className="mt-2 text-sm text-red-700">
+          এই অ্যাকাউন্টটি অ্যাডমিন হিসেবে যুক্ত করা হয়নি।
         </p>
 
         <button
@@ -219,7 +204,7 @@ export default function AdminPage() {
           onClick={handleLogout}
           className="btn-secondary mt-4"
         >
-          Logout
+          লগআউট
         </button>
       </div>
     );
@@ -229,10 +214,8 @@ export default function AdminPage() {
     <div className="space-y-5">
       <header className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <p className="text-sm font-semibold text-emerald-700">Management</p>
-
-          <h2 className="mt-1 text-2xl font-bold text-slate-900">
-            Admin Panel
+          <h2 className="text-2xl font-bold text-slate-900">
+            অ্যাডমিন প্যানেল
           </h2>
 
           <p className="mt-1 text-sm text-slate-500">{session.user.email}</p>
@@ -244,7 +227,7 @@ export default function AdminPage() {
           className="btn-secondary inline-flex items-center justify-center gap-2"
         >
           <LogOut size={16} />
-          Logout
+          লগআউট
         </button>
       </header>
 
@@ -269,9 +252,7 @@ export default function AdminPage() {
       </div>
 
       {activeTab === "expenses" && <ExpenseManager />}
-
       {activeTab === "deposits" && <DepositManager />}
-
       {activeTab === "travellers" && <TravelerManager />}
     </div>
   );
